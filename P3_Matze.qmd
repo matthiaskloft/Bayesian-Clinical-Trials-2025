@@ -1,0 +1,67 @@
+---
+title: "Untitled"
+format: html
+editor: visual
+---
+
+```{r}
+library(tidyverse)
+```
+
+
+# 1) Fixed Design
+```{r}
+# Trial Setting
+N <- 40
+p0 <- 0.30
+p1 <- 0.50
+# Generate data
+nsims <- 1e7
+X <- rbinom(n = nsims, size = N, prob = p0)
+# Find posterior probabilities
+post.prob <- pbeta(p0,
+                   shape1 = X + 1,
+                   shape2 = N - X + 1,
+                   lower.tail = F)
+# Find Type I error
+c <- seq(.9, 1, .001)
+errors <- lapply(
+  c,
+  FUN = function(X) {
+    df <- data.frame(c = X, alpha = mean(post.prob > X) |> unlist())
+    return(df)
+  }
+)
+
+errors <-   do.call("rbind", errors)
+criterion <- errors |> dplyr::filter(alpha <= .05) |> arrange(desc(alpha)) |> pull(c) %>% .[1]
+criterion
+```
+
+# Interim
+
+```{r}
+# Trial Setting
+N1 <- 20
+N2 <- 20
+p0 <- 0.30
+p1 <- 0.50
+# Generate data
+nsims <- 1e6
+X1 <- rbinom(n = nsims, size = N1, prob = p0)
+X2 <- rbinom(n = nsims, size = N2, prob = p0)
+
+
+# Find posterior probabilities
+post.prob1 <- pbeta(p0,
+                   shape1 = X1 + 1,
+                   shape2 = N1 - X1 + 1,
+                   lower.tail = F)
+
+post.prob2 <- pbeta(p0,
+                   shape1 = X1 + X2 + 1,
+                   shape2 = N1 + N2 - X1 - X2 + 1,
+                   lower.tail = F)
+
+mean(post.prob1 > criterion | post.prob2 > criterion, na.rm = T)
+```
