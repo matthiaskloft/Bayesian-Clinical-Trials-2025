@@ -47,7 +47,7 @@ N2 <- 20
 p0 <- 0.30
 p1 <- 0.50
 # Generate data
-nsims <- 1e6
+nsims <- 1e7
 X1 <- rbinom(n = nsims, size = N1, prob = p0)
 X2 <- rbinom(n = nsims, size = N2, prob = p0)
 

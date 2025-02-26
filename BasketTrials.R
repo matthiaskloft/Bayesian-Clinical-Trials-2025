@@ -1,9 +1,9 @@
 #-------------------------------------------------------------------------#
 #               Analysing the BRAF-V600 basket trial                      #
 #-------------------------------------------------------------------------#
-# please modify the working directory to locate the folder on your PC 
+# please modify the working directory to locate the folder on your PC
 # where you have saved your JAGS model scripts
-setwd("~/Documents/BayesianClinicalTrials/Code")
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 set.seed(684324)
 library(rjags)
@@ -18,26 +18,34 @@ data_list <- list(
   p.cut = 0.25
 )
 
-inits <- list(
-    mu.theta = 0
-  )
+inits <- list(mu.theta = 0)
 
 iter <- 10000
 
-jags <- jags.model(file = "StandardHM.txt", data = data_list, 
-                   n.chains = 1,  n.adapt = iter)
+jags <- jags.model(
+  file = "StandardHM.txt",
+  data = data_list,
+  n.chains = 1,
+  n.adapt = iter
+)
 
 update(jags, iter, progress.bar = "none")
 mcmc.sampling <- jags.samples(jags, c("p", "success"), iter, progress.bar = "none")
 
-samples.p <- mcmc.sampling$p[1,,]    # change the value in the bracket from 1 to K 
-samples.success <- mcmc.sampling$success[1,,]
-mean(samples.p); sd(samples.p)
+samples.p <- mcmc.sampling$p[1, , ]    # change the value in the bracket from 1 to K
+samples.success <- mcmc.sampling$success[1, , ]
+mean(samples.p)
+sd(samples.p)
 mean(samples.success)
 
-#Or alternatively
-posterior_sample <- coda.samples(jags, data = data_list, 
-                                 n.chains = 1,  variable.names = c("p", "success"), n.iter = iter)
+# Or alternatively
+posterior_sample <- coda.samples(
+  jags,
+  data = data_list,
+  n.chains = 1,
+  variable.names = c("p", "success"),
+  n.iter = iter
+)
 summary(posterior_sample)
 
 
@@ -56,22 +64,25 @@ data_list <- list(
   nex.sig = 10
 )
 
-inits <- list(
-  mu.theta = 0
-)
+inits <- list(mu.theta = 0)
 
 iter <- 10000
 
-jags <- jags.model(file = "EXNEX.txt", data = data_list, 
-                   n.chains = 1,  n.adapt = iter)
+jags <- jags.model(
+  file = "EXNEX.txt",
+  data = data_list,
+  n.chains = 1,
+  n.adapt = iter
+)
 
 update(jags, iter, progress.bar = "none")
 mcmc.sampling <- jags.samples(jags, c("p", "success"), iter, progress.bar = "none")
 
-samples.p <- mcmc.sampling$p[1,,]# change the value in the bracket from 1 to K 
-samples.success <- mcmc.sampling$success[1,,]
+samples.p <- mcmc.sampling$p[1, , ]# change the value in the bracket from 1 to K
+samples.success <- mcmc.sampling$success[1, , ]
 
-mean(samples.p); sd(samples.p)
+mean(samples.p)
+sd(samples.p)
 mean(samples.success)
 
 
@@ -86,26 +97,36 @@ data_list <- list(
 )
 
 
-inits <- list(
-  theta = rep(0, 6)
-)
+inits <- list(theta = rep(0, 6))
 
 iter <- 10000
-jags <- jags.model(file = "Stand-alone.txt", data = data_list, 
-                   n.chains = 1,  n.adapt = iter)
+jags <- jags.model(
+  file = "Stand-alone.txt",
+  data = data_list,
+  n.chains = 1,
+  n.adapt = iter
+)
 
 update(jags, iter, progress.bar = "none")
 mcmc.sampling <- jags.samples(jags, c("p", "success"), iter, progress.bar = "none")
 
-samples.p <- mcmc.sampling$p[1,,]# change the value in the bracket from 1 to K 
-samples.success <- mcmc.sampling$success[1,,]
+samples.p <- mcmc.sampling$p[1, , ]# change the value in the bracket from 1 to K
+samples.success <- mcmc.sampling$success[1, , ]
 
-mean(samples.p); sd(samples.p)
+mean(samples.p)
+sd(samples.p)
 mean(samples.success)
 
 # Alternatively
-mcmc.sampling0 <- coda.samples(jags, data = data_list, n.chains = 1,
-                               variable.names = c("p", "success"), n.iter = 1e4)
+mcmc.sampling0 <- coda.samples(
+  jags,
+  data = data_list,
+  n.chains = 1,
+  variable.names = c("p", "success"),
+  n.iter = 1e4
+)
 
 mcmc_stats0 <- summary(mcmc.sampling0)
-mcmc_stats0$statistics[1:6,1]
+mcmc_stats0$statistics[1:6, 1]
+
+bmabasket::bma(n = data_list$n, y = data_list$r, pi0 = data_list$p.cut)
